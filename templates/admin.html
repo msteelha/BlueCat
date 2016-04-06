@@ -1,0 +1,59 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title>Course Schedule</title>
+<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+</head>
+
+<body>
+<h1>Admin Page</h1>
+<p>This is just a placeholder page</p>
+<div class="container">
+<form id="addForm" action="/_DriverConfig" method="get">
+  <!--<button name="login" type="submit" value="client" class="btn btn-default">Client</button> -->
+  Name: <input type="text" name="name"><br>
+  <button name="DriverSetting" type="submit" value="add" class="btn btn-primary">Add Driver</button>  
+  </form>
+  
+  <h1>Drivers</h1>
+
+{% if session.drivers %}
+{% for memo in session.drivers %}
+<div class="memo">
+<div class="row">
+<div class="col-md-2">
+{{ memo.name }}
+</div>
+<div class="col-md-6">
+{{ memo.date }}
+</div>
+<form id="removeForm" action="/_DriverConfig" method="get">
+	<input type="hidden" name="DriverId" value={{memo._id}}>
+    <button name="DriverSetting" class="btn btn-primary" value="remove">Delete</button>
+</form>
+
+</div> <!-- row -->
+</div> <!-- memo -->
+  
+{% endfor %}
+{% else %}
+<p>No Drivers for you. </p>  
+{% endif %}
+  
+  
+  <script type="text/javascript">
+  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+	function myFunction(val){
+		document.getElementById(if(val=="add"){"addForm"}else{"removeForm"}).submit();
+		//var portal = val;
+        //$.getJSON($SCRIPT_ROOT + '/_login', { portal: portal} ); // End of the call to getJSON
+    };
+</script>
+  
+</div>
+</body> 
+</html>

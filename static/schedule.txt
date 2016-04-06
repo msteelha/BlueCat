@@ -1,0 +1,33 @@
+
+begin:  09/28/2015
+
+week: 1
+
+topic: Introduction, web architecture
+topic: Version control with git
+project: Trivial web server in Python
+
+week: 2
+
+topic: Web frameworks, configuration control, packaging
+project: Simple Flask web service, packaging with pyvenv and pip
+
+week: 3
+
+topic: Javascript, packaging, building
+project: tbd
+
+week: 4
+
+week: 5
+
+week: 6
+
+week: 7
+
+week: 8
+
+week: 9
+
+week: 10
+
