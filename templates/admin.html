@@ -13,47 +13,64 @@
 <h1>Admin Page</h1>
 <p>This is just a placeholder page</p>
 <div class="container">
-<form id="addForm" action="/_DriverConfig" method="get">
+<form id="addSchedule" action="/_ScheduleConfig" method="get">
   <!--<button name="login" type="submit" value="client" class="btn btn-default">Client</button> -->
   Name: <input type="text" name="name"><br>
-  <button name="DriverSetting" type="submit" value="add" class="btn btn-primary">Add Driver</button>  
+  <button name="ScheduleSetting" type="submit" value="addSchedule" class="btn btn-primary">Add Schedule</button>
   </form>
-  
-  <h1>Drivers</h1>
 
-{% if session.drivers %}
-{% for memo in session.drivers %}
+  <h1>Schedules</h1>
+
+{% if session.schedules %}
+{% for sch in session.schedules %}
+<div class="memo">
+<div class="row">
+<div class="col-md-2">
+{{ sch.name }}
+</div>
+<div class="col-md-6">
+{{ sch.date }}
+</div>
+<form id="removeSchedule" action="/_ScheduleConfig" method="get">
+    <input type="hidden" name="ScheduleId" value={{sch._id}}>
+    <button name="ScheduleSetting" class="btn btn-primary" value="removeSchedule">Delete</button>
+</form>
+{% endfor %}
+{% else %}
+<p>No schedules for you. </p>
+{% endif %}
+  <h1>Clients</h1>
+{% if session.clients %}
+{% for memo in session.clients %}
 <div class="memo">
 <div class="row">
 <div class="col-md-2">
 {{ memo.name }}
 </div>
 <div class="col-md-6">
-{{ memo.date }}
+{{ memo.status }}
 </div>
-<form id="removeForm" action="/_DriverConfig" method="get">
-	<input type="hidden" name="DriverId" value={{memo._id}}>
-    <button name="DriverSetting" class="btn btn-primary" value="remove">Delete</button>
+<form id="removeClient" action="/_ClientsConfig" method="get">
+    <input type="hidden" name="ClientId" value={{memo._id}}>
+    <button name="ClientSetting" class="btn btn-primary" value="removeClient">Delete</button>
 </form>
 
 </div> <!-- row -->
 </div> <!-- memo -->
-  
+
 {% endfor %}
 {% else %}
-<p>No Drivers for you. </p>  
+<p>No clients for you. </p>
 {% endif %}
-  
-  
+
+
   <script type="text/javascript">
   $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-	function myFunction(val){
-		document.getElementById(if(val=="add"){"addForm"}else{"removeForm"}).submit();
-		//var portal = val;
-        //$.getJSON($SCRIPT_ROOT + '/_login', { portal: portal} ); // End of the call to getJSON
+    function myFunction(val){
+        document.getElementById(val).submit();
     };
 </script>
-  
+
 </div>
-</body> 
+</body>
 </html>

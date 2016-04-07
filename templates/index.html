@@ -13,25 +13,25 @@
 <h1>Index Page</h1>
 <p>This is just a placeholder page</p>
 <div class="container">
-	<form action="/_login" method="get">
+    <form action="/_login" method="get">
   <button name="login" type="submit" value="client" class="btn btn-default">Client</button>
-  <button name="login" type="submit" value="admin" class="btn btn-primary">Admin</button>  
+  <button name="login" type="submit" value="admin" class="btn btn-primary">Admin</button>
   </form>
   <script type="text/javascript">
   $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-	function myFunction(val){
-		document.getElementById("myForm").submit();
-		//var portal = val;
+    function myFunction(val){
+        document.getElementById("myForm").submit();
+        //var portal = val;
         //$.getJSON($SCRIPT_ROOT + '/_login', { portal: portal} ); // End of the call to getJSON
     };
 </script>
-  
+
 </div>
-  
 
 
 
-</body> 
+
+</body>
 
 
 </html>

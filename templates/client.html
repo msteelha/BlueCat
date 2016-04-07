@@ -13,18 +13,40 @@
 <h1>Client Page</h1>
 <p>This is just a placeholder page</p>
 <div class="container">
-	<form id="myForm" action="/_submitClientInfo">
-    First name: <input type="text" name="fname"><br>
-    Last name: <input type="text" name="lname"><br><br>
-    <input type="button" onclick="myFunction()" value="Submit form">
+    <form id="myForm" action="/_submitClientInfo">
+    First name: <input type="text" id="fname" name="fname"><br>
+    Last name: <input type="text" id="lname" name="lname"><br><br>
+    <!---<input id="myBtn" type="button" onclick="myFunction()" value="Submit form">-->
+    <input id="myBtn" type="button" value="addClient">
 </form>
- 
+
   <script type="text/javascript">
-  function myFunction() {
-    document.getElementById("myForm").submit();
-}
+
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+
+  $(document).ready(function(){
+      $("#myBtn").click(function(){
+          var fname = document.getElementById("fname").value;
+          var lname = document.getElementById("lname").value;
+          $.getJSON($SCRIPT_ROOT + '/_submitClientInfo',
+                  { fname: fname, lname: lname, ClientSetting: document.getElementById("myBtn").value},
+                  function(data) {
+                     var result = data.result;
+                     obj = JSON.parse(result);
+                     alert("Got a response: " +  result);
+                  }); // End of the call to getJSON
+          });  // End of the function to be called when field changes
+     });   // end of what we do on document ready
+
 </script>
-  
+
+
+
+  <!--function myFunction() {
+    document.getElementById("myForm").submit();
+}-->
+</script>
+
 </div>
-</body> 
+</body>
 </html>
