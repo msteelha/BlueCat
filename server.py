@@ -131,17 +131,34 @@ def scheduleConfig():
     objId = request.args.get('ScheduleSetting',0,type=str)
     app.logger.debug(objId)
     if objId == "addSchedule":
-        name = request.args.get('name',0,type=str)
-        app.logger.debug("schedule added!")
-        record = { "name": name, "date":  arrow.utcnow().naive, "ID": "29838472983" ,"type": "Schedule"}
-        collectionSchedules.insert(record)
+        #name = request.args.get('name',0,type=str)
+        numSchedules = request.args.get('name',0,type=int)
+        #app.logger.debug("schedule added!")
+        tempCount = collectionSchedules.find({}).count() + 1
+        app.logger.debug(tempCount)
+        if tempCount > 1:
+            app.logger.debug("failed! schedules already here")
+            #d = {'result':'failed! 4 schedules already'}
+            #d = json.dumps(d)
+            #return jsonify(result = d)
+            return flask.redirect(url_for('admin'))
+        for i in range(1,numSchedules+1):
+            record = { "name": i, "date":  arrow.utcnow().naive, "ID": "29838472983" ,"type": "Schedule"}
+            collectionSchedules.insert(record)
+        #d = {'result':'success! added schedule'+tempCount}
+        #d = json.dumps(d)
     elif objId == "removeSchedule":
-        objId = request.args.get('ScheduleId',0,type=str)
-        app.logger.debug("attempting to remove schedule" + str(objId))
-        if collectionSchedules.remove({"_id": ObjectId(objId)}):
-            app.logger.debug("success!")
+        ScheduleId = request.args.get('ScheduleId',0,type=str)
+        app.logger.debug(ScheduleId)
+        if ScheduleId == "0":
+            app.logger.debug("deleting all schedules")
+            collectionSchedules.remove({})
         else:
-            app.logger.debug("failed!")
+            app.logger.debug("attempting to remove schedule" + str(ScheduleId))
+            if collectionSchedules.remove({"_id": ObjectId(ScheduleId)}):
+                app.logger.debug("success!")
+            else:
+                app.logger.debug("failed!")
     else:
         app.logger.debug("wat")
     return flask.redirect(url_for('admin'))

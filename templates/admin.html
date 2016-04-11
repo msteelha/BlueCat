@@ -15,10 +15,13 @@
 <div class="container">
 <form id="addSchedule" action="/_ScheduleConfig" method="get">
   <!--<button name="login" type="submit" value="client" class="btn btn-default">Client</button> -->
-  Name: <input type="text" name="name"><br>
-  <button name="ScheduleSetting" type="submit" value="addSchedule" class="btn btn-primary">Add Schedule</button>
+  Number of Schedules: <input type="text" name="name"><br>
+  <button name="ScheduleSetting" type="submit" value="addSchedule" class="btn btn-primary">Add Schedules</button>
   </form>
-
+<form id="removeAllSchedules" action="/_ScheduleConfig" method="get">
+    <input type="hidden" name="ScheduleId" value="0">
+    <button name="ScheduleSetting" class="btn btn-primary" value="removeSchedule">Delete schedules</button>
+</form>
   <h1>Schedules</h1>
 
 {% if session.schedules %}
