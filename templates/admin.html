@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html> <head>
-<title>Course Schedule</title>
+<title>SafeRide Admin</title>
 <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
@@ -16,13 +16,13 @@
 <form id="addSchedule" action="/_ScheduleConfig" method="get">
   <!--<button name="login" type="submit" value="client" class="btn btn-default">Client</button> -->
   Number of Schedules: <input type="text" name="name"><br>
-  <button name="ScheduleSetting" type="submit" value="addSchedule" class="btn btn-primary">Add Schedules</button>
+  <button name="ScheduleSetting" type="submit" value="addSchedule"onclick='renderSchedule' class="btn btn-primary">Add Schedules</button>
   </form>
 <form id="removeAllSchedules" action="/_ScheduleConfig" method="get">
     <input type="hidden" name="ScheduleId" value="0">
     <button name="ScheduleSetting" class="btn btn-primary" value="removeSchedule">Delete schedules</button>
 </form>
-  <h1>Schedules</h1>
+<!--  <h1>Schedules</h1>
 
 {% if session.schedules %}
 {% for sch in session.schedules %}
@@ -41,13 +41,15 @@
 {% endfor %}
 {% else %}
 <p>No schedules for you. </p>
-{% endif %}
+{% endif %}-->
+<div class="col-md-3">
   <h1>Clients</h1>
 {% if session.clients %}
 {% for memo in session.clients %}
 <div class="memo">
-<div class="row">
-<div class="col-md-2">
+<!--<div class="row">
+<div class="col-md-2">-->
+<div class="col-md-8">
 {{ memo.name }}
 </div>
 <div class="col-md-6">
@@ -65,7 +67,44 @@
 {% else %}
 <p>No clients for you. </p>
 {% endif %}
+<div class="col-md-3">
+  <h1>Schedules</h1>
 
+{% if session.schedules %}
+{% for sch in session.schedules %}
+<div class="memo">
+        <h3>{{ sch.name }}</h3>
+        <h4>{{ sch.date }}</h4><!--  thinking function to make bg black if taken cycle through times in py  -->
+    <div class="table-responsive">
+<table class="table table-hover">
+    <thead>
+      <tr>
+        <th>Time</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for t in sch.times %}
+
+      <tr>
+        <td>{{ t }}</td>
+        <td>  </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+        </table></div></div></div>
+
+
+<form id="removeSchedule" action="/_ScheduleConfig" method="get">
+    <input type="hidden" name="ScheduleId" value={{sch._id}}>
+    <button name="ScheduleSetting" class="btn btn-primary" value="removeSchedule">Delete</button>
+</form>
+{% endfor %}
+{% else %}
+<p>No schedules for you. </p>
+{% endif %}
+    </div>
+</div> <!--end Row-->
 
   <script type="text/javascript">
   $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};

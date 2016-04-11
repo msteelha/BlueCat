@@ -143,7 +143,8 @@ def scheduleConfig():
             #return jsonify(result = d)
             return flask.redirect(url_for('admin'))
         for i in range(1,numSchedules+1):
-            record = { "name": i, "date":  arrow.utcnow().naive, "ID": "29838472983" ,"type": "Schedule"}
+            #record = { "name": i, "date":  arrow.utcnow().naive, "ID": "29838472983" ,"type": "Schedule"}
+            record = { "name": i, "date":  arrow.utcnow().naive, "ID": "29838472983" ,"type": "Schedule", "times": ["6:00", "6:05", "6:10", "6:15", "6:20", "6:25", "6:30", "6:35", "6:40", "6:45", "6:50", "6:55", "7:00", "7:05", "7:10", "7:15", "7:20", "7:25", "7:30", "7:35", "7:40", "7:45", "7:50", "7:55", "8:00", "8:05", "8:10", "8:15", "8:20", "8:05", "8:05", "8:05", "8:05", "8:05", "8:05", "8:05", "8:05", "8:05" ]}
             collectionSchedules.insert(record)
         #d = {'result':'success! added schedule'+tempCount}
         #d = json.dumps(d)
