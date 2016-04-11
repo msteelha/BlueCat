@@ -75,6 +75,7 @@ def admin():
     app.logger.debug("admin page entry")
     flask.session['clients'] = get_list("Clients")
     flask.session['schedules'] = get_list("Schedules")
+    
     #for sch in flask.session['schedules']:
         #app.logger.debug("schedule: " + str(sch))
     return flask.render_template('admin.html')
@@ -133,7 +134,7 @@ def scheduleConfig():
     if objId == "addSchedule":
         name = request.args.get('name',0,type=str)
         app.logger.debug("schedule added!")
-        record = { "name": name, "date":  arrow.utcnow().naive, "ID": "29838472983" ,"type": "Schedule"}
+        record = { "name": name, "date":  arrow.utcnow().naive, "ID": "29838472983" ,"type": "Schedule", "times": ["6:00", "6:05", "6:10", "6:15", "6:20", "6:25", "6:30", "6:35", "6:40", "6:45", "6:50", "6:55", "7:00", "7:05", "7:10", "7:15", "7:20", "7:25", "7:30", "7:35", "7:40", "7:45", "7:50", "7:55", "8:00", "8:05", "8:10", "8:15", "8:20", "8:05", "8:05", "8:05", "8:05", "8:05", "8:05", "8:05", "8:05", "8:05" ]}
         collectionSchedules.insert(record)
     elif objId == "removeSchedule":
         objId = request.args.get('ScheduleId',0,type=str)

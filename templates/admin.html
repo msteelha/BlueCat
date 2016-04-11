@@ -1,11 +1,12 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html> <head>
-<title>Course Schedule</title>
+<title>SafeRide Admin</title>
 <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
   <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
 
 </head>
 
@@ -16,21 +17,59 @@
 <form id="addSchedule" action="/_ScheduleConfig" method="get">
   <!--<button name="login" type="submit" value="client" class="btn btn-default">Client</button> -->
   Name: <input type="text" name="name"><br>
-  <button name="ScheduleSetting" type="submit" value="addSchedule" class="btn btn-primary">Add Schedule</button>
+  <button name="ScheduleSetting" type="submit" value="addSchedule" class="btn btn-primary" onclick='renderSchedule'>Add Schedule</button>
   </form>
+<div class="row">
+<div class="col-md-3">
+  <h1>Clients</h1>
+{% if session.clients %}
+{% for memo in session.clients %}
+<div class="memo">
+<div class="col-md-8">
+{{ memo.name }}
+</div>
+<div class="col-md-8">
+{{ memo.status }}
+</div>
+<form id="removeClient" action="/_ClientsConfig" method="get">
+    <input type="hidden" name="ClientId" value={{memo._id}}>
+    <button name="ClientSetting" class="btn btn-primary" value="removeClient">Delete</button>
+</form>
+    </div>
+</div> <!-- memo -->
 
+{% endfor %}
+{% else %}
+<p>No clients for you. </p>
+{% endif %}
+<div class="col-md-3">
   <h1>Schedules</h1>
 
 {% if session.schedules %}
 {% for sch in session.schedules %}
 <div class="memo">
-<div class="row">
-<div class="col-md-2">
-{{ sch.name }}
-</div>
-<div class="col-md-6">
-{{ sch.date }}
-</div>
+        <h3>{{ sch.name }}</h3>
+        <h4>{{ sch.date }}</h4><!--  thinking function to make bg black if taken cycle through times in py  -->
+    <div class="table-responsive">
+<table class="table table-hover">
+    <thead>
+      <tr>
+        <th>Time</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for t in sch.times %}
+    
+      <tr>
+        <td>{{ t }}</td>
+        <td>  </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+        </table></div></div></div>
+        
+
 <form id="removeSchedule" action="/_ScheduleConfig" method="get">
     <input type="hidden" name="ScheduleId" value={{sch._id}}>
     <button name="ScheduleSetting" class="btn btn-primary" value="removeSchedule">Delete</button>
@@ -39,29 +78,9 @@
 {% else %}
 <p>No schedules for you. </p>
 {% endif %}
-  <h1>Clients</h1>
-{% if session.clients %}
-{% for memo in session.clients %}
-<div class="memo">
-<div class="row">
-<div class="col-md-2">
-{{ memo.name }}
-</div>
-<div class="col-md-6">
-{{ memo.status }}
-</div>
-<form id="removeClient" action="/_ClientsConfig" method="get">
-    <input type="hidden" name="ClientId" value={{memo._id}}>
-    <button name="ClientSetting" class="btn btn-primary" value="removeClient">Delete</button>
-</form>
+    </div>
+</div> <!--end Row-->
 
-</div> <!-- row -->
-</div> <!-- memo -->
-
-{% endfor %}
-{% else %}
-<p>No clients for you. </p>
-{% endif %}
 
 
   <script type="text/javascript">
