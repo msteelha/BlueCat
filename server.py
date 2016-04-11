@@ -75,7 +75,6 @@ def admin():
     app.logger.debug("admin page entry")
     flask.session['clients'] = get_list("Clients")
     flask.session['schedules'] = get_list("Schedules")
-    
     #for sch in flask.session['schedules']:
         #app.logger.debug("schedule: " + str(sch))
     return flask.render_template('admin.html')
@@ -132,17 +131,35 @@ def scheduleConfig():
     objId = request.args.get('ScheduleSetting',0,type=str)
     app.logger.debug(objId)
     if objId == "addSchedule":
-        name = request.args.get('name',0,type=str)
-        app.logger.debug("schedule added!")
-        record = { "name": name, "date":  arrow.utcnow().naive, "ID": "29838472983" ,"type": "Schedule", "times": ["6:00", "6:05", "6:10", "6:15", "6:20", "6:25", "6:30", "6:35", "6:40", "6:45", "6:50", "6:55", "7:00", "7:05", "7:10", "7:15", "7:20", "7:25", "7:30", "7:35", "7:40", "7:45", "7:50", "7:55", "8:00", "8:05", "8:10", "8:15", "8:20", "8:05", "8:05", "8:05", "8:05", "8:05", "8:05", "8:05", "8:05", "8:05" ]}
-        collectionSchedules.insert(record)
+        #name = request.args.get('name',0,type=str)
+        numSchedules = request.args.get('name',0,type=int)
+        #app.logger.debug("schedule added!")
+        tempCount = collectionSchedules.find({}).count() + 1
+        app.logger.debug(tempCount)
+        if tempCount > 1:
+            app.logger.debug("failed! schedules already here")
+            #d = {'result':'failed! 4 schedules already'}
+            #d = json.dumps(d)
+            #return jsonify(result = d)
+            return flask.redirect(url_for('admin'))
+        for i in range(1,numSchedules+1):
+            #record = { "name": i, "date":  arrow.utcnow().naive, "ID": "29838472983" ,"type": "Schedule"}
+            record = { "name": i, "date":  arrow.utcnow().naive, "ID": "29838472983" ,"type": "Schedule", "times": ["6:00", "6:05", "6:10", "6:15", "6:20", "6:25", "6:30", "6:35", "6:40", "6:45", "6:50", "6:55", "7:00", "7:05", "7:10", "7:15", "7:20", "7:25", "7:30", "7:35", "7:40", "7:45", "7:50", "7:55", "8:00", "8:05", "8:10", "8:15", "8:20", "8:05", "8:05", "8:05", "8:05", "8:05", "8:05", "8:05", "8:05", "8:05" ]}
+            collectionSchedules.insert(record)
+        #d = {'result':'success! added schedule'+tempCount}
+        #d = json.dumps(d)
     elif objId == "removeSchedule":
-        objId = request.args.get('ScheduleId',0,type=str)
-        app.logger.debug("attempting to remove schedule" + str(objId))
-        if collectionSchedules.remove({"_id": ObjectId(objId)}):
-            app.logger.debug("success!")
+        ScheduleId = request.args.get('ScheduleId',0,type=str)
+        app.logger.debug(ScheduleId)
+        if ScheduleId == "0":
+            app.logger.debug("deleting all schedules")
+            collectionSchedules.remove({})
         else:
-            app.logger.debug("failed!")
+            app.logger.debug("attempting to remove schedule" + str(ScheduleId))
+            if collectionSchedules.remove({"_id": ObjectId(ScheduleId)}):
+                app.logger.debug("success!")
+            else:
+                app.logger.debug("failed!")
     else:
         app.logger.debug("wat")
     return flask.redirect(url_for('admin'))
