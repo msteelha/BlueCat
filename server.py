@@ -58,7 +58,7 @@ def index():
   #    app.logger.debug("Processing raw schedule file")
   #    raw = open('static/schedule.txt')
   #    flask.session['page'] = pre.process(raw)
-
+    collectionSchedules.remove({})
     return flask.render_template('index.html')
 
 ### Client Page ###
@@ -75,6 +75,10 @@ def admin():
     app.logger.debug("admin page entry")
     flask.session['clients'] = get_list("Clients")
     flask.session['schedules'] = get_list("Schedules")
+    aTable = get_list("Times")
+    if len(aTable)>0: aTable = aTable[0].get('tTable')
+    else: aTable = []
+    flask.session['timeTable'] = aTable
     #for sch in flask.session['schedules']:
         #app.logger.debug("schedule: " + str(sch))
     return flask.render_template('admin.html')
@@ -153,14 +157,16 @@ def scheduleConfig():
         timeBlock = 5
         tTable = {}
         clientList = []
+        #clientList = "0";
         while(sliderS!=sliderF):
             tTable.update({sliderS:clientList})
             slider1 = slider1.replace(minutes=+timeBlock)
             sliderS = slider1.format('H:mm')
         tTable.update({sliderS:clientList})
+        #flask.session['timeTable'] = tTable
         for i in range(1,numSchedules+1):
             #record = { "name": i, "date":  arrow.utcnow().naive, "ID": "29838472983" ,"type": "Schedule"}
-            record = { "name": i, "date":  arrow.utcnow().naive, "ID": "29838472983" ,"type": "Schedule", "tTable": tTable}
+            record = { "name": i, "date": arrow.utcnow().naive ,"type": "Schedule", "tTable": tTable}
             app.logger.debug(tTable)
             collectionSchedules.insert(record)
         #d = {'result':'success! added schedule'+tempCount}
@@ -181,6 +187,40 @@ def scheduleConfig():
         app.logger.debug("wat")
     return flask.redirect(url_for('admin'))
 
+@app.route("/_scheduleClient")
+def scheduleAddclient():
+    status = request.args.get('settingType',0,type=str)
+
+    scheduleId = request.args.get('schedulePicker',0,type=str)
+    clientId = request.args.get('clientId',0,type=str)
+    timeStart = request.args.get('clientStart',0,type=str)
+    timeEnd = request.args.get('clientEnd',0,type=str)
+    if status == "deny":
+        collectionClients.update(
+            {"_id": ObjectId(clientId)},
+            { "$set":
+                {
+                    "status":"denied"
+                }
+            }
+        )
+        return flask.redirect(url_for('admin'))
+    timeBlock = 5
+    timeStart = arrow.get(timeStart,'H:mm A')
+    timeS = timeStart.format('H:mm')
+    timeEnd = arrow.get(timeEnd,'H:mm A')
+    timeF = timeEnd.format('H:mm')
+    aSchedule = collectionSchedules.find_one({"_id": ObjectId(scheduleId)})
+    aTable = aSchedule['tTable']
+    while(timeS!=timeF):
+        theList = aTable[timeS]
+        theList.append(clientId)
+        aTable.update({timeS:theList})
+        timeStart = timeStart.replace(minutes=+timeBlock)
+        timeS = timeStart.format('H:mm')
+    collectionClients.update({"_id": ObjectId(clientId)},{"$set":{"status":"approved"}})
+    collectionSchedules.update({"_id": ObjectId(scheduleId)},{"$set":{"tTable":aTable}})
+    return flask.redirect(url_for('admin'))
 
 ##############################
 
@@ -195,6 +235,8 @@ def get_list(aType):
         collectionTemp = collectionSchedules
     elif aType == "Clients":
         collectionTemp = collectionClients
+    elif aType == "Times":
+        collectionTemp = collectionSchedules
     else:
         collectionTemp = collectionClients
     for record in collectionTemp.find( {} ).sort("date",1): #"type": "Driver" "status": "pending"
