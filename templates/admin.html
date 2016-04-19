@@ -55,13 +55,32 @@
     <button name="ClientSetting" class="btn btn-primary" value="removeClient">Delete</button>
 </form>
 
+<form id="addClientToSchedule" action="/_scheduleClient" method="get">
+    <select name = "schedulePicker">
+    {%for sched in session.schedules%}
+        <option value={{sched._id}}>{{sched.name}}</option>
+    {%endfor%}
+    </select>
+    <div id="time-range">
+    <input type="hidden" id="clientStart" name="clientStart" value="8:00 PM">
+    <input type="hidden" id="clientEnd"name="clientEnd" value="9:00 PM">
+    <p>Time: <span name="slider3" class="slider-time3">8:00 PM</span> - <span name="slider4" class="slider-time4">9:00 PM</span></p>
+    <div class="sliders_step2">
+      <div id="slider-range2">
+      </div>
+    </div>
+  </div>
+    <input type="hidden" name="clientId" value={{memo._id}}>
+    <button name="SettingType" class="btn btn-primary" value="approve">Add Client</button>
+    <button name="SettingType" class="btn btn-primary" value="deny">Deny</button>
+</form>
     </div> <!-- row -->
 
 {% endfor %}
 {% else %}
 <p>No clients for you. </p>
 {% endif %}
-    
+	
 <div class="row">
 <h1>Schedules</h1>
     <div class="table-responsive">
@@ -73,33 +92,36 @@
     </thead>
     <tbody>
     <tr>
-		<td></td>
-		{% for sch in session.schedules %}
-		{% if sch.name > 1 %}
-		{% else %}
-		{% for Key, Value in sch.tTable.items()|sort %}
-        <td>{{ Key }}</td>
+    	<td></td>
+    		{% for sch in session.schedules %}
+    		{% if sch.name > 1 %}
+    		{% else %}
+    		{% for Key, Value in sch.tTable.items()|sort %}
+    <td>{{ Key }}</td>
     	{% endfor %}
-		{% endif %}
-		{% endfor %}
-		
-	</tr>	
+    		{% endif %}
+    		{% endfor %}
+    		
+    	</tr>	
     {% for sch in session.schedules %}
-	<tr style="height:40px;">
-		<td>{{ sch.name }}</td>
-	{% for Key, Value in sch.tTable.items()|sort %}
-		{% if Value == [] %}
-			<td bgcolor="#00FF00"></td>
-		{% else %}
-        <td bgcolor="#FF0000">{{ Value }}</td>
-		{% endif %}
+    <tr style="height:40px;">
+    <td>{{ sch.name }}</td>
+    {% for Key, Value in sch.tTable.items()|sort %}
+        {% if Value != [] %}
+            <td bgcolor="#FF0000">
+            {% for clientId in Value%}
+                {{ clientId }}<br>
+            {%endfor%}
+            </td>
+            {% else %}
+                <td bgcolor="#00FF00"></td>
+        {% endif %}
     {% endfor %}
-	</tr>
-	{% endfor %}
-      
+    	</tr>
+    	{% endfor %}
+
     </tbody>
         </table>
-
 {% else %}
 <p>No schedules for you. </p>
 {% endif %}</div></div>
@@ -177,6 +199,74 @@ $("#slider-range").slider({
     $("#scheduleEnd").val(hours2 + ':' + minutes2);
   }
 });
+
+$("#slider-range2").slider({
+  range: true,
+  min: 360,
+  max: 840,
+  step: 5,
+  values: [480,540],
+  slide: function (e, ui) {
+    var hours1 = Math.floor(ui.values[0] / 60);
+    var minutes1 = ui.values[0] - (hours1 * 60);
+    if (hours1.length == 1) {
+      hours1 = "0" + hours1;
+    }
+    if (minutes1 == 5) {
+      minutes1 = "05";
+    }
+    if (minutes1 == 0) {
+      minutes1 = "00";
+    }
+    if (hours1 >= 12) {
+      if (hours1 == 12) {
+        hours1 = hours1;
+        minutes1 = minutes1 + " AM";
+      } else {
+        hours1 = hours1 - 12;
+        minutes1 = minutes1 + " AM";
+      }
+    } else {
+      hours1 = hours1;
+      minutes1 = minutes1 + " PM";
+    }
+    if (hours1 == 0) {
+      hours1 = 12;
+      minutes1 = minutes1;
+    }
+    $('.slider-time3').html(hours1 + ':' + minutes1);
+    $("#clientStart").val(hours1 + ':' + minutes1);
+    var hours2 = Math.floor(ui.values[1]/60);
+    var minutes2 = ui.values[1] - (hours2*60);
+    if (hours2.length == 1) {
+      hours2 = "0" + hours2;
+    }
+    if (minutes2 == 5) {
+      minutes2 = "05";
+    }
+    if (minutes2 == 0) {
+      minutes2 = "00";
+    }
+    if (hours2 >= 12) {
+      if (hours2 == 12) {
+        hours2 = hours2;
+        minutes2 = minutes2 + " AM";
+      } else if (hours2 == 24) {
+        hours2 = 11;
+        minutes2 = "59 PM";
+      } else {
+        hours2 = hours2 - 12;
+        minutes2 = minutes2 + " AM";
+      }
+    } else {
+      hours2 = hours2;
+      minutes2 = minutes2 + " PM";
+    }
+    $('.slider-time4').html(hours2 + ':' + minutes2);
+    $("#clientEnd").val(hours2 + ':' + minutes2);
+  }
+});
+
 </script>
 </div>
 </body>
