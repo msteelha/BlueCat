@@ -73,6 +73,7 @@ def client():
 @app.route("/admin")
 def admin():
     app.logger.debug("admin page entry")
+    flask.session['newClient'] = True
     flask.session['clients'] = get_list("Clients")
     flask.session['schedules'] = get_list("Schedules")
     aTable = get_list("Times")
@@ -187,6 +188,19 @@ def scheduleConfig():
         app.logger.debug("wat")
     return flask.redirect(url_for('admin'))
 
+
+@app.route("/stream")
+def stream():
+    def eventStream():
+        #pull data from database, see if new client submission
+        with app.test_request_context():
+            if flask.session.get('newClient') == True:
+                yield "data: %s\n\n" % ("new rides requested")
+    return flask.Response(eventStream(), mimetype="text/event-stream")
+
+
+
+
 @app.route("/_scheduleClient")
 def scheduleAddclient():
     status = request.args.get('settingType',0,type=str)
@@ -223,6 +237,8 @@ def scheduleAddclient():
     return flask.redirect(url_for('admin'))
 
 ##############################
+def get_client_info(clientId):
+    return collectionClients.find({"_id": ObjectId(clientId)})
 
 def get_list(aType):
     """
@@ -254,4 +270,4 @@ if __name__ == "__main__":
     app.secret_key = str(uuid.uuid4())
     app.debug = CONFIG.DEBUG
     app.logger.setLevel(logging.DEBUG)
-    app.run(port=CONFIG.PORT)
+    app.run(port=CONFIG.PORT,threaded=True)

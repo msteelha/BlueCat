@@ -23,63 +23,65 @@
 </form>
 {% else %}
 <form id="addSchedule" action="/_ScheduleConfig" method="get">
-  <!--<button name="login" type="submit" value="client" class="btn btn-default">Client</button> -->
-  Number of Schedules: <input type="text" name="name"><br>
-  <div id="time-range">
-    <input type="hidden" id="scheduleStart" name="scheduleStart" value="8:00 PM">
-    <input type="hidden" id="scheduleEnd"name="scheduleEnd" value="9:00 PM">
-    <p>Time: <span name="slider1" class="slider-time">8:00 PM</span> - <span name="slider2" class="slider-time2">9:00 PM</span></p>
-    <div class="sliders_step1">
-      <div id="slider-range">
-      </div>
+    <!--<button name="login" type="submit" value="client" class="btn btn-default">Client</button> -->
+    Number of Schedules: <input type="text" name="name"><br>
+    <div id="time-range">
+        <input type="hidden" id="scheduleStart" name="scheduleStart" value="8:00 PM">
+        <input type="hidden" id="scheduleEnd"name="scheduleEnd" value="9:00 PM">
+        <p>Time: <span name="slider1" class="slider-time">8:00 PM</span> - <span name="slider2" class="slider-time2">9:00 PM</span></p>
+        <div class="sliders_step1">
+            <div id="slider-range">
+            </div>
+        </div>
     </div>
-  </div>
   <button name="ScheduleSetting" type="submit" value="addSchedule"onclick='renderSchedule' class="btn btn-primary">Add Schedules</button>
-  </form>
+</form>
   {% endif %}
 
-<div class="row">
+<div class="row" id="clientList" name="clientList">
+  <link rel="stylesheet" type="text/css" href="../static/css/slider.css">
 <div class="col-md-3">
   <h1>Clients</h1>
-{% if session.clients %}
-{% for memo in session.clients %}
-    </div>
-<div class="col-md-3">
-{{ memo.name }}
-</div>
-<div class="col-md-3">
-{{ memo.status }}
-</div>
-<form id="removeClient" action="/_ClientsConfig" method="get">
-    <input type="hidden" name="ClientId" value={{memo._id}}>
-    <button name="ClientSetting" class="btn btn-primary" value="removeClient">Delete</button>
-</form>
-<form id="addClientToSchedule" action="/_scheduleClient" method="get">
-    <select name = "schedulePicker">
-    {%for sched in session.schedules%}
-        <option value={{sched._id}}>{{sched.name}}</option>
-    {%endfor%}
-    </select>
-    <div id="time-range">
-    <input type="hidden" id="clientStart" name="clientStart" value="8:00 PM">
-    <input type="hidden" id="clientEnd"name="clientEnd" value="9:00 PM">
-    <p>Time: <span name="slider3" class="slider-time3">8:00 PM</span> - <span name="slider4" class="slider-time4">9:00 PM</span></p>
-    <div class="sliders_step2">
-      <div id="slider-range2">
       </div>
-    </div>
-  </div>
-    <input type="hidden" name="clientId" value={{memo._id}}>
-    <button name="SettingType" class="btn btn-primary" value="approve">Add Client</button>
-    <button name="SettingType" class="btn btn-primary" value="deny">Deny</button>
-</form>
-    </div> <!-- row -->
+{% if session.clients %}
+    {% for memo in session.clients %}
+        <div class="client-div">
+            <div class="col-md-3">
+                {{ memo.name }}
+            </div>
+            <div class="col-md-3">
+                {{ memo.status }}
+            </div>
+            <form id="removeClient" action="/_ClientsConfig" method="get">
+                <input type="hidden" name="ClientId" value={{memo._id}}>
+                <button name="ClientSetting" class="btn btn-primary" value="removeClient">Delete</button>
+            </form>
+            <form id="addClientToSchedule" action="/_scheduleClient" method="get">
+                <select name = "schedulePicker">
+                    {%for sched in session.schedules%}
+                        <option value={{sched._id}}>{{sched.name}}</option>
+                    {%endfor%}
+                </select>
+                <div id="time-range">
+                    <input type="hidden" id="clientStart" name="clientStart" value="8:00 PM">
+                    <input type="hidden" id="clientEnd"name="clientEnd" value="9:00 PM">
+                    <p>Time: <span name="slider3" class="slider-time3">8:00 PM</span> - <span name="slider4" class="slider-time4">9:00 PM</span></p>
+                    <div class="sliders_step2">
+                      <div id="slider-range2">
+                      </div>
+                    </div>
+                  </div>
+                <input type="hidden" name="clientId" value={{memo._id}}>
+                <button name="SettingType" class="btn btn-primary" value="approve">Add Client</button>
+                <button name="SettingType" class="btn btn-primary" value="deny">Deny</button>
+            </form>
+        </div> <!-- row -->
 
-{% endfor %}
+    {% endfor %}
 {% else %}
-<p>No clients for you. </p>
+    <p>No clients for you. </p>
 {% endif %}
-
+</div>
 <div class="row">
 <h1>Schedules</h1>
     <div class="table-responsive">
@@ -199,7 +201,8 @@ $("#slider-range").slider({
     $("#scheduleEnd").val(hours2 + ':' + minutes2);
   }
 });
-
+</script>
+<script type="text/javascript">
 $("#slider-range2").slider({
   range: true,
   min: 360,
@@ -268,6 +271,21 @@ $("#slider-range2").slider({
 });
 
 </script>
+
+<script type="text/javascript">
+var targetContainer = document.getElementById("clientList");
+var eventSource = new EventSource("/stream");
+eventSource.addEventListener('message', function(e) {
+  console.log("got a message");
+}, false);
+eventSource.addEventListener('open', function(e) {
+  // Connection was opened.
+    console.log("open");
+    //$('#clientList').load(document.URL +  ' #clientList');
+//}, false);
+</script>
+
+
 </div>
 </body>
 </html>
