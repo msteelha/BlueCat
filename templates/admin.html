@@ -15,6 +15,10 @@
 <body>
 <h1>Admin Page</h1>
 <p>This is just a placeholder page</p>
+  <form action="/_adminSettings" method="get">
+  <button name="setting" type="submit" value="logout" class="btn btn-default">Logout</button>
+  <button name="setting" type="submit" value="removeAdmin" class="btn btn-primary">Delete Account</button>
+  </form>
 <div class="container">
 {% if session.schedules %}
 <form id="removeAllSchedules" action="/_ScheduleConfig" method="get">
@@ -39,7 +43,6 @@
   {% endif %}
 
 <div class="row" id="clientList" name="clientList">
-  <link rel="stylesheet" type="text/css" href="../static/css/slider.css">
 <div class="col-md-3">
   <h1>Clients</h1>
       </div>

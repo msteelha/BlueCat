@@ -39,6 +39,7 @@ try:
     db = dbclient.service
     collectionSchedules = db.schedules
     collectionClients = db.clients
+    collectionAccounts = db.accounts
 except:
     print("Failure opening database.  Is Mongo running? Correct password?")
     #sys.exit(1)
@@ -54,11 +55,6 @@ except:
 @app.route("/index")
 def index():
     app.logger.debug("Main page entry")
-  #if 'page' not in flask.session:
-  #    app.logger.debug("Processing raw schedule file")
-  #    raw = open('static/schedule.txt')
-  #    flask.session['page'] = pre.process(raw)
-    collectionSchedules.remove({})
     return flask.render_template('index.html')
 
 ### Client Page ###
@@ -73,16 +69,29 @@ def client():
 @app.route("/admin")
 def admin():
     app.logger.debug("admin page entry")
-    flask.session['newClient'] = True
+    if flask.session.get('login') != True:
+        return flask.render_template('login.html')
     flask.session['clients'] = get_list("Clients")
     flask.session['schedules'] = get_list("Schedules")
     aTable = get_list("Times")
     if len(aTable)>0: aTable = aTable[0].get('tTable')
     else: aTable = []
     flask.session['timeTable'] = aTable
-    #for sch in flask.session['schedules']:
-        #app.logger.debug("schedule: " + str(sch))
     return flask.render_template('admin.html')
+
+@app.route('/login')
+def login():
+    if flask.session.get('login') == True:
+        return flask.redirect(url_for('admin'))
+    else:
+        return flask.render_template('login.html')
+
+@app.route('/createAdmin')
+def createAdmin():
+    if collectionAccounts.find_one({}) != None:
+        return flask.redirect(url_for('login'))
+    else:
+        return flask.render_template('createAdmin.html')
 
 @app.errorhandler(404)
 def page_not_found(error):
@@ -129,6 +138,43 @@ def clientConfig():
     d = json.dumps(d)
     return jsonify(result = d)
     #return flask.redirect(url_for('client'))
+
+@app.route("/_submitLoginRequest")
+def loginGate():
+    adminName = request.args.get('adminName',0,type=str)
+    adminKey = request.args.get('adminKey',0,type=str)
+    if collectionAccounts.find_one({'name':adminName,'password':adminKey}) != None:
+        flask.session['login'] = True
+        d = {'result':'success'}
+    else:
+        d = {'result':'failed'}
+    d = json.dumps(d)
+    return jsonify(result = d)
+
+@app.route("/_adminSettings")
+def adminSettings():
+    setting = request.args.get('setting',0,type=str)
+    adminName = request.args.get('adminName',0,type=str)
+    adminKey = request.args.get('adminKey',0,type=str)
+    if setting  == "requestAccess":
+        if collectionAccounts.find_one({}) == None:
+            record = {"name":adminName, "password":adminKey, "date":arrow.utcnow().naive}
+            app.logger.debug(record)
+            collectionAccounts.insert(record)
+            d = {'result':'added'}
+        else:
+            d = {'result':'failed'}
+    elif setting == "removeAdmin":
+        collectionAccounts.remove({})
+        flask.session['login'] = False
+        return flask.redirect(url_for('login'))
+    elif setting == "logout":
+        flask.session['login'] = False
+        return flask.redirect(url_for('login'))
+    else:
+        d = {'result':'wat'}
+    d = json.dumps(d)
+    return jsonify(result = d)
 
 @app.route("/_ScheduleConfig")
 def scheduleConfig():
@@ -197,8 +243,6 @@ def stream():
             if flask.session.get('newClient') == True:
                 yield "data: %s\n\n" % ("new rides requested")
     return flask.Response(eventStream(), mimetype="text/event-stream")
-
-
 
 
 @app.route("/_scheduleClient")

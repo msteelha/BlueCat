@@ -1,0 +1,58 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title>Admin Create Page</title>
+<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+</head>
+
+<body>
+<h1>Admin Create Page</h1>
+<p>Create an Administrator</p>
+<div class="container">
+    <form id="myForm">
+    First name: <input type="text" id="adminName" name="adminName"><br>
+    Last name: <input type="text" id="adminKey" name="adminKey"><br><br>
+    <!---<input id="myBtn" type="button" onclick="myFunction()" value="Submit form">-->
+    <input id="myBtn" type="button" value="requestAccess">
+</form>
+
+  <script type="text/javascript">
+
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+
+  $(document).ready(function(){
+      $("#myBtn").click(function(){
+          var adminName = document.getElementById("adminName").value;
+          var adminKey = document.getElementById("adminKey").value;
+          $.getJSON($SCRIPT_ROOT + '/_adminSettings',
+                  { adminName: adminName, adminKey: adminKey, setting: document.getElementById("myBtn").value},
+                  function(data) {
+                     var result = data.result;
+                     obj = JSON.parse(result);
+                     if(result == "result: failed"){
+                        alert("invalid username or password, please try again");
+                         }
+                    else{
+                        window.location = "/admin"
+                        }
+
+                  }); // End of the call to getJSON
+          });  // End of the function to be called when field changes
+     });   // end of what we do on document ready
+
+</script>
+
+
+
+  <!--function myFunction() {
+    document.getElementById("myForm").submit();
+}-->
+</script>
+
+</div>
+</body>
+</html>
