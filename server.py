@@ -57,8 +57,6 @@ except:
 @app.route("/")
 @app.route("/index")
 def index():
-    collectionSchedules.remove({})
-    collectionClients.remove({})
     app.logger.debug("Main page entry")
     return flask.render_template('index.html')
 
@@ -264,7 +262,7 @@ def scheduleAddclient():
     clientId = request.args.get('clientId',0,type=str)
     timeStart = request.args.get('clientStart',0,type=str)
     timeEnd = request.args.get('clientEnd',0,type=str)
-    if status == "deny":
+    if status == 'deny':
         collectionClients.update(
             {"_id": ObjectId(clientId)},
             { "$set":
@@ -276,10 +274,15 @@ def scheduleAddclient():
         return flask.redirect(url_for('admin'))
     timeBlock = 5
     timeStart = arrow.get(timeStart,'H:mm A')
-    timeS = str(timeStart.timestamp)
     timeEnd = arrow.get(timeEnd,'H:mm A')
     timeEnd = timeEnd.replace(minutes=+timeBlock)
-    timeF = timeEnd.timestamp
+
+    if timeEnd < timeStart:
+        timeEnd = timeEnd.replace(day=2)
+
+    timeS = str(timeStart.timestamp)
+    timeF = str(timeEnd.timestamp)
+
     aSchedule = collectionSchedules.find_one({"_id": ObjectId(scheduleId)})
     aTable = aSchedule['tTable']
     while(timeS!=timeF):
