@@ -1,22 +1,26 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html> <head>
-<title>Course Schedule</title>
+<title>SafeRide</title>
 <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="../static/css/BlueCatStyle.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
   <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 
 </head>
 
 <body>
-<img src="../static/saferide_banner.png" alt="SafeRide Banner">
-<h1>Index Page</h1>
+	<div class="container-fluid bg-1 text-center"><img src="../static/saferide_banner.png" alt="SafeRide Banner" style="align-content:center;"><h1>Index Page</h1>
 <p>This is just a placeholder page</p>
-<div class="container">
+	</div>
+<div class="container-fluid bg-2">
     <form action="/_login" method="get">
-  <button name="login" type="submit" value="client" class="btn btn-default">Client</button>
-  <button name="login" type="submit" value="admin" class="btn btn-primary">Admin</button>
+  <div class="col-md-6"><button name="login" type="submit" value="client" class="btn btn-default btn-block">Client</button>
+  </div>
+  <div class="col-md-6">
+  <button name="login" type="submit" value="admin" class="btn btn-primary btn-block">Admin</button>
+  </div>
   </form>
   <script type="text/javascript">
   $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
@@ -33,6 +37,12 @@
 
 
 </body>
+<footer class="footer">
+      <div class="container">
+		  <p class="text-muted">Contact: 541.346.7433</p>
+		  <p class="text-muted">Fall/Winter:  Sun-Thurs 6pm-12am  Weekend 6pm-2am | Spring:  Sun-Thurs 7pm-12am  Weekend 7pm-2am | Summer:  Sun-Thurs 8pm-12am  Weekend 8pm-2am</p>
+      </div>
+</footer>
 
 
 </html>

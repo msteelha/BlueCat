@@ -8,6 +8,13 @@
 .bg-2{
 	background-color: lightgrey;
     color: black;
-	padding: 20px 30px 20px 30px;
+	padding: 20px 30px 60px 30px;
 	
+}
+footer{
+	position:fixed;
+	bottom:0;
+	right: 0;
+	left: 0;
+	text-align: center;
 }
