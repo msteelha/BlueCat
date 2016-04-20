@@ -7,6 +7,8 @@ from flask import jsonify # For AJAX transactions
 import json
 import logging
 
+from jinja2 import Environment, Undefined
+
 # Mongo database
 import pymongo
 from pymongo import MongoClient
@@ -34,6 +36,7 @@ app.secret_key = str(uuid.uuid4())
 app.debug = CONFIG.DEBUG
 app.logger.setLevel(logging.DEBUG)
 
+
 try:
     dbclient = MongoClient(CONFIG.MONGO_URL)
     db = dbclient.service
@@ -54,6 +57,8 @@ except:
 @app.route("/")
 @app.route("/index")
 def index():
+    collectionSchedules.remove({})
+    collectionClients.remove({})
     app.logger.debug("Main page entry")
     return flask.render_template('index.html')
 
@@ -196,11 +201,16 @@ def scheduleConfig():
         slider1 = request.args.get('scheduleStart',0,type=str)
         app.logger.debug(slider1)
         slider1 = arrow.get(slider1,'H:mm A')
-        sliderS = slider1.format('H:mm')
-        app.logger.debug(sliderS)
+
+        app.logger.debug(slider1)
         slider2 = request.args.get('scheduleEnd',0,type=str)
         slider2 = arrow.get(slider2,'H:mm A')
-        sliderF = slider2.format('H:mm')
+
+        if slider2 < slider1:
+            slider2 = slider2.replace(day=2)
+
+        sliderS = str(slider1.timestamp)
+        sliderF = str(slider2.timestamp)
         timeBlock = 5
         tTable = {}
         clientList = []
@@ -208,7 +218,8 @@ def scheduleConfig():
         while(sliderS!=sliderF):
             tTable.update({sliderS:clientList})
             slider1 = slider1.replace(minutes=+timeBlock)
-            sliderS = slider1.format('H:mm')
+            #sliderS = slider1.format('H:mm')
+            sliderS = str(slider1.timestamp)
         tTable.update({sliderS:clientList})
         #flask.session['timeTable'] = tTable
         for i in range(1,numSchedules+1):
@@ -265,9 +276,10 @@ def scheduleAddclient():
         return flask.redirect(url_for('admin'))
     timeBlock = 5
     timeStart = arrow.get(timeStart,'H:mm A')
-    timeS = timeStart.format('H:mm')
+    timeS = str(timeStart.timestamp)
     timeEnd = arrow.get(timeEnd,'H:mm A')
-    timeF = timeEnd.format('H:mm')
+    timeEnd = timeEnd.replace(minutes=+timeBlock)
+    timeF = timeEnd.timestamp
     aSchedule = collectionSchedules.find_one({"_id": ObjectId(scheduleId)})
     aTable = aSchedule['tTable']
     while(timeS!=timeF):
@@ -275,12 +287,18 @@ def scheduleAddclient():
         theList.append(clientId)
         aTable.update({timeS:theList})
         timeStart = timeStart.replace(minutes=+timeBlock)
-        timeS = timeStart.format('H:mm')
+        timeS = str(timeStart.timestamp)
     collectionClients.update({"_id": ObjectId(clientId)},{"$set":{"status":"approved"}})
     collectionSchedules.update({"_id": ObjectId(scheduleId)},{"$set":{"tTable":aTable}})
     return flask.redirect(url_for('admin'))
 
 ##############################
+@app.template_filter('convert_time')
+def convert_time(timestamp):
+    val = arrow.get(timestamp)
+    return val.format('h:mm A')
+
+@app.template_filter('clientInfo')
 def get_client_info(clientId):
     return collectionClients.find({"_id": ObjectId(clientId)})
 
@@ -308,6 +326,9 @@ def get_list(aType):
         records.append(record)
     return records
 
+env = Environment()
+env.filters['translateTime'] = convert_time
+env.filters['clientInfo'] = get_client_info
 
 if __name__ == "__main__":
     import uuid

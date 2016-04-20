@@ -100,8 +100,8 @@
     		{% for sch in session.schedules %}
     		{% if sch.name > 1 %}
     		{% else %}
-    		{% for Key, Value in sch.tTable.items()|sort %}
-    <td>{{ Key }}</td>
+    		{% for Key, Value in sch.tTable.items()|sort(reverse = True) %}
+    <td>{{ Key|convert_time }}</td>
     	{% endfor %}
     		{% endif %}
     		{% endfor %}
@@ -110,7 +110,7 @@
     {% for sch in session.schedules %}
     <tr style="height:40px;">
     <td>{{ sch.name }}</td>
-    {% for Key, Value in sch.tTable.items()|sort %}
+    {% for Key, Value in sch.tTable.items()|sort(reverse = True) %}
         {% if Value != [] %}
             <td bgcolor="#FF0000">
             {% for clientId in Value%}
