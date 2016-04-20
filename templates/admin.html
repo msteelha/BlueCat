@@ -13,10 +13,15 @@
 
 </head>
 <body>
-	<div class="container-fluid bg-1 text-center"><h1>Dispatch</h1>
+
+<div class="container-fluid bg-1 text-center"><h1>Dispatch</h1>
 <p>SafeRide HQ</p>
 	</div>
 <div class="container-fluid bg-2">
+  <form action="/_adminSettings" method="get">
+  <button name="setting" type="submit" value="logout" class="btn btn-default">Logout</button>
+  <button name="setting" type="submit" value="removeAdmin" class="btn btn-primary">Delete Account</button>
+  </form>
 {% if session.schedules %}
 <form id="removeAllSchedules" action="/_ScheduleConfig" method="get">
     <input type="hidden" name="ScheduleId" value="0">
@@ -24,65 +29,68 @@
 </form>
 {% else %}
 <form id="addSchedule" action="/_ScheduleConfig" method="get">
-  <!--<button name="login" type="submit" value="client" class="btn btn-default">Client</button> -->
-  Number of Schedules: <input type="text" name="name"><br>
-  <div id="time-range">
-    <input type="hidden" id="scheduleStart" name="scheduleStart" value="8:00 PM">
-    <input type="hidden" id="scheduleEnd"name="scheduleEnd" value="9:00 PM">
-    <p>Time: <span name="slider1" class="slider-time">8:00 PM</span> - <span name="slider2" class="slider-time2">9:00 PM</span></p>
-    <div class="sliders_step1">
-      <div id="slider-range">
-      </div>
+    <!--<button name="login" type="submit" value="client" class="btn btn-default">Client</button> -->
+    Number of Schedules: <input type="text" name="name"><br>
+    <div id="time-range">
+        <input type="hidden" id="scheduleStart" name="scheduleStart" value="8:00 PM">
+        <input type="hidden" id="scheduleEnd"name="scheduleEnd" value="9:00 PM">
+        <p>Time: <span name="slider1" class="slider-time">8:00 PM</span> - <span name="slider2" class="slider-time2">9:00 PM</span></p>
+        <div class="sliders_step1">
+            <div id="slider-range">
+            </div>
+        </div>
     </div>
-  </div>
   <button name="ScheduleSetting" type="submit" value="addSchedule"onclick='renderSchedule' class="btn btn-primary">Add Schedules</button>
-  </form>
+</form>
   {% endif %}
 
-<div class="row">
-<div class="col-md-2">
-  <h2>Clients</h2>
-{% if session.clients %}
-{% for memo in session.clients %}
-    </div>
-<div class="col-md-2">
-{{ memo.name }}
-</div>
-<div class="col-md-2">
-{{ memo.status }}
-</div>
+<div class="row" id="clientList" name="clientList">
 <div class="col-md-3">
-<form id="removeClient" action="/_ClientsConfig" method="get">
-    <input type="hidden" name="ClientId" value={{memo._id}}>
-    <button name="ClientSetting" class="btn btn-primary" value="removeClient">Delete</button>
-</form></div>
-<div class="col-md-3">
-<form id="addClientToSchedule" action="/_scheduleClient" method="get">
-    <select name = "schedulePicker">
-    {%for sched in session.schedules%}
-        <option value={{sched._id}}>{{sched.name}}</option>
-    {%endfor%}
-    </select>
-    <div id="time-range">
-    <input type="hidden" id="clientStart" name="clientStart" value="8:00 PM">
-    <input type="hidden" id="clientEnd"name="clientEnd" value="9:00 PM">
-    <p>Time: <span name="slider3" class="slider-time3">8:00 PM</span> - <span name="slider4" class="slider-time4">9:00 PM</span></p>
-    <div class="sliders_step2">
-      <div id="slider-range2">
+  <h1>Clients</h1>
       </div>
-    </div>
-  </div>
-    <input type="hidden" name="clientId" value={{memo._id}}>
-    <button name="SettingType" class="btn btn-primary" value="approve">Add Client</button>
-    <button name="SettingType" class="btn btn-primary" value="deny">Deny</button>
-</form></div>
-    </div> <!-- row -->
+{% if session.clients %}
+    {% for memo in session.clients %}
+        <div class="client-div">
+            <div class="col-md-3">
+                {{ memo.name }}
+            </div>
+            <div class="col-md-3">
+                {{ memo.status }}
+            </div>
+			<div class="col-md-3">
+            <form id="removeClient" action="/_ClientsConfig" method="get">
+                <input type="hidden" name="ClientId" value={{memo._id}}>
+                <button name="ClientSetting" class="btn btn-primary" value="removeClient">Delete</button>
+				</form>
+            <form id="addClientToSchedule" action="/_scheduleClient" method="get">
+                <select name = "schedulePicker">
+                    {%for sched in session.schedules%}
+                        <option value={{sched._id}}>{{sched.name}}</option>
+                    {%endfor%}
+                </select>
+                <div id="time-range">
+                    <input type="hidden" id="clientStart" name="clientStart" value="8:00 PM">
+                    <input type="hidden" id="clientEnd"name="clientEnd" value="9:00 PM">
+                    <p>Time: <span name="slider3" class="slider-time3">8:00 PM</span> - <span name="slider4" class="slider-time4">9:00 PM</span></p>
+                    <div class="sliders_step2">
+                      <div id="slider-range2">
+                      </div>
+                    </div>
+                  </div>
+                <input type="hidden" name="clientId" value={{memo._id}}>
+                <button name="SettingType" class="btn btn-primary" value="approve">Add Client</button>
+                <button name="SettingType" class="btn btn-primary" value="deny">Deny</button>
+				</form></div>
+        </div> 
 
-{% endfor %}
+    {% endfor %}
 {% else %}
-<p>No clients for you. </p>
+    <p>No clients for you. </p>
 {% endif %}
-<div class="container">	
+
+</div><!--row-->
+	
+<div class="container">
 <div class="row">
 <h2>Schedules</h2>
     <div class="table-responsive text-center">
@@ -98,8 +106,8 @@
     		{% for sch in session.schedules %}
     		{% if sch.name > 1 %}
     		{% else %}
-    		{% for Key, Value in sch.tTable.items()|sort %}
-    <td>{{ Key }}</td>
+    		{% for Key, Value in sch.tTable.items()|sort(reverse = True) %}
+    <td>{{ Key|convert_time }}</td>
     	{% endfor %}
     		{% endif %}
     		{% endfor %}
@@ -108,7 +116,7 @@
     {% for sch in session.schedules %}
     <tr style="height:40px;">
     <td>{{ sch.name }}</td>
-    {% for Key, Value in sch.tTable.items()|sort %}
+    {% for Key, Value in sch.tTable.items()|sort(reverse = True) %}
         {% if Value != [] %}
             <td bgcolor="#FF0000">
             {% for clientId in Value%}
@@ -203,7 +211,8 @@ $("#slider-range").slider({
     $("#scheduleEnd").val(hours2 + ':' + minutes2);
   }
 });
-
+</script>
+<script type="text/javascript">
 $("#slider-range2").slider({
   range: true,
   min: 360,
@@ -271,7 +280,23 @@ $("#slider-range2").slider({
   }
 });
 
-	</script></div></div>
+</script>
+
+<script type="text/javascript">
+var targetContainer = document.getElementById("clientList");
+var eventSource = new EventSource("/stream");
+eventSource.addEventListener('message', function(e) {
+  console.log("got a message");
+}, false);
+eventSource.addEventListener('open', function(e) {
+  // Connection was opened.
+    console.log("open");
+    //$('#clientList').load(document.URL +  ' #clientList');
+//}, false);
+</script>
+
+
+	</div></div>
 </body>
 
 <footer class="footer">

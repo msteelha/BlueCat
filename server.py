@@ -7,6 +7,8 @@ from flask import jsonify # For AJAX transactions
 import json
 import logging
 
+from jinja2 import Environment, Undefined
+
 # Mongo database
 import pymongo
 from pymongo import MongoClient
@@ -34,11 +36,13 @@ app.secret_key = str(uuid.uuid4())
 app.debug = CONFIG.DEBUG
 app.logger.setLevel(logging.DEBUG)
 
+
 try:
     dbclient = MongoClient(CONFIG.MONGO_URL)
     db = dbclient.service
     collectionSchedules = db.schedules
     collectionClients = db.clients
+    collectionAccounts = db.accounts
 except:
     print("Failure opening database.  Is Mongo running? Correct password?")
     #sys.exit(1)
@@ -53,12 +57,9 @@ except:
 @app.route("/")
 @app.route("/index")
 def index():
-    app.logger.debug("Main page entry")
-  #if 'page' not in flask.session:
-  #    app.logger.debug("Processing raw schedule file")
-  #    raw = open('static/schedule.txt')
-  #    flask.session['page'] = pre.process(raw)
     collectionSchedules.remove({})
+    collectionClients.remove({})
+    app.logger.debug("Main page entry")
     return flask.render_template('index.html')
 
 ### Client Page ###
@@ -73,15 +74,29 @@ def client():
 @app.route("/admin")
 def admin():
     app.logger.debug("admin page entry")
+    if flask.session.get('login') != True:
+        return flask.render_template('login.html')
     flask.session['clients'] = get_list("Clients")
     flask.session['schedules'] = get_list("Schedules")
     aTable = get_list("Times")
     if len(aTable)>0: aTable = aTable[0].get('tTable')
     else: aTable = []
     flask.session['timeTable'] = aTable
-    #for sch in flask.session['schedules']:
-        #app.logger.debug("schedule: " + str(sch))
     return flask.render_template('admin.html')
+
+@app.route('/login')
+def login():
+    if flask.session.get('login') == True:
+        return flask.redirect(url_for('admin'))
+    else:
+        return flask.render_template('login.html')
+
+@app.route('/createAdmin')
+def createAdmin():
+    if collectionAccounts.find_one({}) != None:
+        return flask.redirect(url_for('login'))
+    else:
+        return flask.render_template('createAdmin.html')
 
 @app.errorhandler(404)
 def page_not_found(error):
@@ -129,6 +144,43 @@ def clientConfig():
     return jsonify(result = d)
     #return flask.redirect(url_for('client'))
 
+@app.route("/_submitLoginRequest")
+def loginGate():
+    adminName = request.args.get('adminName',0,type=str)
+    adminKey = request.args.get('adminKey',0,type=str)
+    if collectionAccounts.find_one({'name':adminName,'password':adminKey}) != None:
+        flask.session['login'] = True
+        d = {'result':'success'}
+    else:
+        d = {'result':'failed'}
+    d = json.dumps(d)
+    return jsonify(result = d)
+
+@app.route("/_adminSettings")
+def adminSettings():
+    setting = request.args.get('setting',0,type=str)
+    adminName = request.args.get('adminName',0,type=str)
+    adminKey = request.args.get('adminKey',0,type=str)
+    if setting  == "requestAccess":
+        if collectionAccounts.find_one({}) == None:
+            record = {"name":adminName, "password":adminKey, "date":arrow.utcnow().naive}
+            app.logger.debug(record)
+            collectionAccounts.insert(record)
+            d = {'result':'added'}
+        else:
+            d = {'result':'failed'}
+    elif setting == "removeAdmin":
+        collectionAccounts.remove({})
+        flask.session['login'] = False
+        return flask.redirect(url_for('login'))
+    elif setting == "logout":
+        flask.session['login'] = False
+        return flask.redirect(url_for('login'))
+    else:
+        d = {'result':'wat'}
+    d = json.dumps(d)
+    return jsonify(result = d)
+
 @app.route("/_ScheduleConfig")
 def scheduleConfig():
     #collectionTemp = collectionSchedules
@@ -149,11 +201,16 @@ def scheduleConfig():
         slider1 = request.args.get('scheduleStart',0,type=str)
         app.logger.debug(slider1)
         slider1 = arrow.get(slider1,'H:mm A')
-        sliderS = slider1.format('H:mm')
-        app.logger.debug(sliderS)
+
+        app.logger.debug(slider1)
         slider2 = request.args.get('scheduleEnd',0,type=str)
         slider2 = arrow.get(slider2,'H:mm A')
-        sliderF = slider2.format('H:mm')
+
+        if slider2 < slider1:
+            slider2 = slider2.replace(day=2)
+
+        sliderS = str(slider1.timestamp)
+        sliderF = str(slider2.timestamp)
         timeBlock = 5
         tTable = {}
         clientList = []
@@ -161,7 +218,8 @@ def scheduleConfig():
         while(sliderS!=sliderF):
             tTable.update({sliderS:clientList})
             slider1 = slider1.replace(minutes=+timeBlock)
-            sliderS = slider1.format('H:mm')
+            #sliderS = slider1.format('H:mm')
+            sliderS = str(slider1.timestamp)
         tTable.update({sliderS:clientList})
         #flask.session['timeTable'] = tTable
         for i in range(1,numSchedules+1):
@@ -187,6 +245,17 @@ def scheduleConfig():
         app.logger.debug("wat")
     return flask.redirect(url_for('admin'))
 
+
+@app.route("/stream")
+def stream():
+    def eventStream():
+        #pull data from database, see if new client submission
+        with app.test_request_context():
+            if flask.session.get('newClient') == True:
+                yield "data: %s\n\n" % ("new rides requested")
+    return flask.Response(eventStream(), mimetype="text/event-stream")
+
+
 @app.route("/_scheduleClient")
 def scheduleAddclient():
     status = request.args.get('settingType',0,type=str)
@@ -207,9 +276,10 @@ def scheduleAddclient():
         return flask.redirect(url_for('admin'))
     timeBlock = 5
     timeStart = arrow.get(timeStart,'H:mm A')
-    timeS = timeStart.format('H:mm')
+    timeS = str(timeStart.timestamp)
     timeEnd = arrow.get(timeEnd,'H:mm A')
-    timeF = timeEnd.format('H:mm')
+    timeEnd = timeEnd.replace(minutes=+timeBlock)
+    timeF = timeEnd.timestamp
     aSchedule = collectionSchedules.find_one({"_id": ObjectId(scheduleId)})
     aTable = aSchedule['tTable']
     while(timeS!=timeF):
@@ -217,12 +287,20 @@ def scheduleAddclient():
         theList.append(clientId)
         aTable.update({timeS:theList})
         timeStart = timeStart.replace(minutes=+timeBlock)
-        timeS = timeStart.format('H:mm')
+        timeS = str(timeStart.timestamp)
     collectionClients.update({"_id": ObjectId(clientId)},{"$set":{"status":"approved"}})
     collectionSchedules.update({"_id": ObjectId(scheduleId)},{"$set":{"tTable":aTable}})
     return flask.redirect(url_for('admin'))
 
 ##############################
+@app.template_filter('convert_time')
+def convert_time(timestamp):
+    val = arrow.get(timestamp)
+    return val.format('h:mm A')
+
+@app.template_filter('clientInfo')
+def get_client_info(clientId):
+    return collectionClients.find({"_id": ObjectId(clientId)})
 
 def get_list(aType):
     """
@@ -248,10 +326,13 @@ def get_list(aType):
         records.append(record)
     return records
 
+env = Environment()
+env.filters['translateTime'] = convert_time
+env.filters['clientInfo'] = get_client_info
 
 if __name__ == "__main__":
     import uuid
     app.secret_key = str(uuid.uuid4())
     app.debug = CONFIG.DEBUG
     app.logger.setLevel(logging.DEBUG)
-    app.run(port=CONFIG.PORT)
+    app.run(port=CONFIG.PORT,threaded=True)
