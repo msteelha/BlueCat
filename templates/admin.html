@@ -44,20 +44,15 @@
 </form>
   {% endif %}
 
-<div class="row" id="clientList" name="clientList">
-<div class="col-md-3">
   <h1>Clients</h1>
-      </div>
+<div class="row" id="clientList" name="clientList">
 {% if session.clients %}
     {% for memo in session.clients %}
+	<div class="col-lg-3">
         <div class="client-div">
-            <div class="col-md-3">
                 {{ memo.name }}
-            </div>
-            <div class="col-md-3">
                 {{ memo.status }}
-            </div>
-			<div class="col-md-3">
+            
             <form id="removeClient" action="/_ClientsConfig" method="get">
                 <input type="hidden" name="ClientId" value={{memo._id}}>
                 <button name="ClientSetting" class="btn btn-primary" value="removeClient">Delete</button>
@@ -80,12 +75,12 @@
                 <input type="hidden" name="clientId" value={{memo._id}}>
                 <button name="settingType" class="btn btn-primary" value="approve">Add Client</button>
                 <button name="settingType" class="btn btn-primary" value="deny">Deny</button>
-				</form></div>
+				</form>
         </div>
-
+	</div>
     {% endfor %}
 {% else %}
-    <p>No clients for you. </p>
+    <p style="text-allign:left;">No clients for you. </p>
 {% endif %}
 
 </div><!--row-->
@@ -94,7 +89,7 @@
 <div class="row">
 <h2>Schedules</h2>
     <div class="table-responsive text-center">
-<table class="table table-hover">
+<table class="table table-bordered">
 {% if session.schedules %}
     <thead>
       <tr>
@@ -120,7 +115,14 @@
         {% if Value != [] %}
             <td bgcolor="#FF0000">
             {% for clientId in Value%}
-                {{ clientId }}<br>
+                {% for th in clientId | clientInfo %}
+				{% for Key, Value in th.items() %}
+				{% if (Key == "name" or Key  == "date") %}
+				{{Value}}<br>
+				{% else %}
+				{% endif %}
+				{% endfor %}<br>
+				{% endfor %}
             {%endfor%}
             </td>
             {% else %}
@@ -279,7 +281,6 @@ $("#slider-range2").slider({
     $("#clientEnd").val(hours2 + ':' + minutes2);
   }
 });
-
 </script>
 
 <script type="text/javascript">
@@ -294,11 +295,8 @@ eventSource.addEventListener('open', function(e) {
     //$('#clientList').load(document.URL +  ' #clientList');
 //}, false);
 </script>
-
-
 	</div></div>
 </body>
-
 <footer class="footer">
       <div class="container">
 		  <p class="text-muted">Contact: 541.346.7433</p>
