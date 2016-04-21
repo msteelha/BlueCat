@@ -17,3 +17,8 @@ footer{
 	left: 0;
 	text-align: center;
 }
+pre {
+  overflow: auto;
+  word-wrap: normal;
+  white-space: pre;
+}
