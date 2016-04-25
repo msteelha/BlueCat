@@ -37,6 +37,10 @@
       <label class="radio-inline"><input type="radio" name="optradio" value="3">3 Riders</label>
     </div>  <br>
     <div class="form-group">
+      <label for="time">Pickup time:</label>
+      <input type="text" id="time" name="time" class="form-control">
+    </div>
+    <div class="form-group">
       <label for="pickup">Pickup location:</label>
       <input type="text" id="pickup" name="pickup" class="form-control">
     </div>
@@ -80,6 +84,7 @@
           var studentid = document.getElementById("studentid").value;
           var phonenum = document.getElementById("phonenum").value;
           var riders = $('#radio input:radio:checked').val();
+          var time = document.getElementById("time").value;
           var pickup = document.getElementById("pickup").value;
           var dropoff = document.getElementById("dropoff").value;
 
@@ -111,6 +116,8 @@
             alert("Please enter a phone number");
           } else if (riders == undefined) {
             alert("Please select a number of riders");
+          } else if (time == "") {
+            alert("Please enter a pickup time");
           } else if (pickup == "") {
             alert("Please enter a pickup location");
           } else if (dropoff == "") {
@@ -118,7 +125,7 @@
           } else {
           $.getJSON($SCRIPT_ROOT + '/_submitClientInfo',
                   { fname: fname, studentid: studentid, phonenum: phonenum,
-                    riders: riders, pickup: pickup, dropoff: dropoff, clientSetting: document.getElementById("myBtn").value},
+                    riders: riders, time: time, pickup: pickup, dropoff: dropoff, clientSetting: document.getElementById("myBtn").value},
                   function(data) {
                      var result = data.result;
                      obj = JSON.parse(result);

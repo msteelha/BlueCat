@@ -52,11 +52,11 @@
         <div class="client-div">
                 {{ memo.name }}
                 {{ memo.status }}
-            
+
             <form id="removeClient" action="/_ClientsConfig" method="get">
                 <input type="hidden" name="ClientId" value={{memo._id}}>
-                <button name="ClientSetting" class="btn btn-primary" value="removeClient">Delete</button>
-				</form>
+                <button name="clientSetting" class="btn btn-primary" value="removeClient">Delete</button>
+            </form>
             <form id="addClientToSchedule" action="/_scheduleClient" method="get">
                 <select name = "schedulePicker">
                     {%for sched in session.schedules%}
